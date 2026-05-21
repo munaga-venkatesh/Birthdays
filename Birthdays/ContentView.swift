@@ -6,19 +6,72 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct ContentView: View {
+    @Query(sort: \Friend.birthday) private var friends: [Friend]
+    @Environment(\.modelContext) private var context
+    
+    @State private var newName: String = ""
+    @State private var newDate: Date = .now
+    
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+        NavigationStack {
+            List {
+                ForEach(friends) { friend in
+                    HStack {
+                        if friend.isBirthdayToday {
+                            Image(systemName: "birthday.cake")
+                        }
+                        
+                        Text(friend.name)
+                            .bold(friend.isBirthdayToday)
+                        Spacer()
+                        Text(friend.birthday, format: .dateTime.month(.wide).day().year())
+                    }
+                    .swipeActions {
+                        Button(role: .destructive) {
+                            context.delete(friend)
+                        } label: {
+                            Label("Delete", systemImage: "trash")
+                        }
+                        .labelStyle(.iconOnly)
+                    }
+                }
+            }
+            .navigationTitle("Birthdays")
+            .safeAreaInset(edge: .bottom) {
+                VStack(alignment:.center) {
+                    Text("New Birthday")
+                        .font(.headline)
+                    DatePicker(
+                        selection: $newDate,
+                        in: Date.distantPast...Date.now,
+                        displayedComponents: .date
+                    ) {
+                        TextField("Name", text: $newName)
+                            .disableAutocorrection(true)
+                            .textFieldStyle(.roundedBorder)
+                    }
+                    Button("Save") {
+                        let newFriend = Friend(name: newName, birthday: newDate)
+                        context.insert(newFriend)
+                        
+                        newName = ""
+                        newDate = .now
+                    }
+                    .bold()
+                    .buttonStyle(.bordered)
+                    .tint(.accentColor)
+                }
+                .padding()
+                .background(.bar)
+            }
         }
-        .padding()
     }
 }
 
 #Preview {
     ContentView()
+        .modelContainer(for: Friend.self, inMemory: true)
 }
