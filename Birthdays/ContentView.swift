@@ -17,26 +17,24 @@ struct ContentView: View {
     
     var body: some View {
         NavigationStack {
-            List {
-                ForEach(friends) { friend in
-                    HStack {
-                        if friend.isBirthdayToday {
-                            Image(systemName: "birthday.cake")
-                        }
-                        
-                        Text(friend.name)
-                            .bold(friend.isBirthdayToday)
-                        Spacer()
-                        Text(friend.birthday, format: .dateTime.month(.wide).day().year())
+            List(friends) { friend in
+                HStack {
+                    if friend.isBirthdayToday {
+                        Image(systemName: "birthday.cake")
                     }
-                    .swipeActions {
-                        Button(role: .destructive) {
-                            context.delete(friend)
-                        } label: {
-                            Label("Delete", systemImage: "trash")
-                        }
-                        .labelStyle(.iconOnly)
+                    
+                    Text(friend.name)
+                        .bold(friend.isBirthdayToday)
+                    Spacer()
+                    Text(friend.birthday, format: .dateTime.month(.wide).day().year())
+                }
+                .swipeActions {
+                    Button(role: .destructive) {
+                        context.delete(friend)
+                    } label: {
+                        Label("Delete", systemImage: "trash")
                     }
+                    .labelStyle(.iconOnly)
                 }
             }
             .navigationTitle("Birthdays")
